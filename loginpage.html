@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DosyaCim - Güvenli Bulut Depolama</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <!-- Authentication Section -->
+    <div id="auth-section" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo">📁</div>
+                <h1>DosyaCim</h1>
+                <p>Güvenli Bulut Depolama</p>
+                <div style="margin-top: 20px;">
+                    <a href="index.html" style="color: #667eea; text-decoration: none; font-size: 0.9rem;">← Ana Sayfaya Dön</a>
+                </div>
+            </div>
+            
+            <div class="auth-tabs">
+                <button id="login-tab" class="tab-btn active">Giriş Yap</button>
+                <button id="register-tab" class="tab-btn">Kayıt Ol</button>
+            </div>
+            
+            <div class="auth-form-container">
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form">
+                    <div class="input-group">
+                        <label for="login-email">E-posta</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="login-password">Şifre</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn primary-btn">Giriş Yap</button>
+                    <div id="login-error" class="error-message hidden"></div>
+                </form>
+                
+                <!-- Registration Form (Hidden by default) -->
+                <form id="register-form" class="auth-form hidden">
+                    <div class="input-group">
+                        <label for="register-name">Ad Soyad</label>
+                        <input type="text" id="register-name" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="register-email">E-posta</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="register-password">Şifre</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="register-confirm-password">Şifre Tekrar</label>
+                        <input type="password" id="register-confirm-password" required>
+                    </div>
+                    <button type="submit" class="btn primary-btn">Kayıt Ol</button>
+                    <div id="register-error" class="error-message hidden"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dashboard Section (Hidden by default) -->
+    <div id="dashboard-section" class="dashboard-container hidden">
+        <header class="dashboard-header">
+            <div class="logo">
+                <h1>📁 DosyaCim</h1>
+            </div>
+            <div class="user-actions">
+                <span id="user-email"></span>
+                <button id="logout-btn" class="btn secondary-btn">Çıkış Yap</button>
+            </div>
+        </header>
+        
+        <main class="dashboard-main">
+            <div class="storage-info">
+                <h2>Dosyalarım</h2>
+                <div class="storage-stats">
+                    <span id="used-storage">0 MB</span> / <span id="total-storage">10 GB</span> kullanıldı
+                </div>
+            </div>
+            
+            <!-- File Upload Area -->
+            <div class="upload-area" id="upload-area">
+                <div class="upload-content">
+                    <div class="upload-icon">📁</div>
+                    <p>Dosyaları buraya sürükleyip bırakın</p>
+                    <p>veya</p>
+                    <button id="browse-files-btn" class="btn secondary-btn">Dosya Seçin</button>
+                    <input type="file" id="file-input" multiple class="hidden">
+                </div>
+            </div>
+            
+            <!-- My Files Section -->
+            <div class="files-section">
+                <h3>Dosyalarım</h3>
+                <div id="file-list" class="file-grid">
+                    <!-- Files will be dynamically added here -->
+                    <div class="empty-state">
+                        <p>Henüz dosya yüklenmedi</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Action Menu -->
+    <div id="action-menu" class="action-menu hidden">
+        <ul>
+            <li><button class="menu-item" data-action="download">📥 İndir</button></li>
+            <li><button class="menu-item" data-action="details">📋 Detaylar</button></li>
+            <li><button class="menu-item" data-action="delete">🗑️ Sil</button></li>
+        </ul>
+    </div>
+    
+    <!-- File Details Modal -->
+    <div id="file-details-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Dosya Detayları</h3>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="file-details">
+                <p><strong>Adı:</strong> <span id="detail-name"></span></p>
+                <p><strong>Tür:</strong> <span id="detail-type"></span></p>
+                <p><strong>Boyut:</strong> <span id="detail-size"></span></p>
+                <p><strong>Yükleme Tarihi:</strong> <span id="detail-date"></span></p>
+                <p><strong>İndirme Bağlantısı:</strong> <span id="detail-link"></span></p>
+            </div>
+            <div class="modal-actions">
+                <button id="close-details-btn" class="btn secondary-btn">Kapat</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Message Toast -->
+    <div id="toast" class="toast hidden">
+        <span id="toast-message"></span>
+    </div>
+    
+    <script src="data/filebasedstorage.js"></script>
+    <script src="data/api.js"></script>
+    <script src="scripts/auth.js"></script>
+    <script src="scripts/dashboard.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+</html>
