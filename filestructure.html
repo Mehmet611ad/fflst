@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudVault File Structure Viewer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+        h1, h2 {
+            color: #2d3748;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        .file-content {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .user-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .user-card {
+            background: #edf2f7;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 250px;
+        }
+        .user-card:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+        .file-tree {
+            margin-left: 20px;
+        }
+        .file-item {
+            margin: 5px 0;
+            padding: 5px 0;
+        }
+        .directory {
+            font-weight: bold;
+            color: #2b6cb0;
+        }
+        .file {
+            color: #4a5568;
+        }
+        button {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #3182ce;
+        }
+        .hidden {
+            display: none;
+        }
+        .file-path {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>CloudVault File Structure Viewer</h1>
+    <p>This page shows the file structure that would be created in a real server environment under the /data/ directory.</p>
+    
+    <div class="container">
+        <h2>User Directories</h2>
+        <div id="user-list" class="user-list">
+            <!-- User cards with file structure will be populated here -->
+        </div>
+    </div>
+    
+    <div id="file-viewer" class="container hidden">
+        <h2 id="directory-title">Directory: </h2>
+        <div class="file-path" id="file-path"></div>
+        <div id="file-content" class="file-content">
+            <!-- File content will be shown here -->
+        </div>
+        <button id="back-button" style="margin-top: 15px;">Back to User List</button>
+    </div>
+    
+    <script src="data/filebasedstorage.js"></script>
+    <script>
+        // Function to display user list with file structure
+        function displayUserList() {
+            const users = FileBasedStorage.getAllUsers();
+            const userListElement = document.getElementById('user-list');
+            userListElement.innerHTML = '';
+            
+            if (users.length === 0) {
+                userListElement.innerHTML = '<p>No users found.</p>';
+                return;
+            }
+            
+            users.forEach(user => {
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                
+                // Get user directory structure
+                const userDir = FileBasedStorage.getUserDirectory(user.email);
+                
+                // Build file tree HTML
+                let fileTreeHTML = '';
+                if (userDir && userDir.files) {
+                    userDir.files.forEach(file => {
+                        if (file.type === 'directory') {
+                            fileTreeHTML += `<div class="file-item directory">📁 ${file.name}/</div>`;
+                            if (file.files && file.files.length > 0) {
+                                fileTreeHTML += '<div class="file-tree">';
+                                file.files.forEach(subFile => {
+                                    fileTreeHTML += `<div class="file-item file">📄 ${subFile.name}</div>`;
+                                });
+                                fileTreeHTML += '</div>';
+                            }
+                        } else {
+                            fileTreeHTML += `<div class="file-item file">📄 ${file.name}</div>`;
+                        }
+                    });
+                }
+                
+                userCard.innerHTML = `
+                    <h3>${user.email}</h3>
+                    <p>Created: ${new Date(user.createdAt).toLocaleString()}</p>
+                    <div style="margin-top: 10px;">
+                        <strong>File Structure:</strong>
+                        <div class="file-tree">
+                            <div class="file-item directory">📁 data/${user.email}/</div>
+                            <div class="file-tree">
+                                <div class="file-item file">📄 information.txt</div>
+                                <div class="file-item directory">📁 downloads/</div>
+                                ${fileTreeHTML.includes('downloads/') ? '' : '<div class="file-tree"></div>'}
+                                ${fileTreeHTML.includes('downloads/') ? fileTreeHTML.split('downloads/')[1] || '' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                userCard.addEventListener('click', () => showUserFiles(user.email));
+                userListElement.appendChild(userCard);
+            });
+        }
+        
+        // Function to show user files
+        function showUserFiles(email) {
+            document.getElementById('directory-title').textContent = `Directory: /data/${email}/`;
+            document.getElementById('file-path').textContent = `/data/${email}/`;
+            
+            // Get user info file content
+            const userInfoContent = FileBasedStorage.getUserInfoContent(email) || 'No information.txt file found.';
+            
+            document.getElementById('file-content').textContent = userInfoContent;
+            
+            // Show file viewer and hide user list
+            document.getElementById('user-list').parentElement.classList.add('hidden');
+            document.getElementById('file-viewer').classList.remove('hidden');
+        }
+        
+        // Back button handler
+        document.getElementById('back-button').addEventListener('click', () => {
+            document.getElementById('file-viewer').classList.add('hidden');
+            document.getElementById('user-list').parentElement.classList.remove('hidden');
+        });
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            displayUserList();
+        });
+    </script>
+</body>
+</html>
